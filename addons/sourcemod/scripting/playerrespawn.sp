@@ -114,8 +114,8 @@ public Action:Command_Respawn(client, args)
 		{
 			if(GetConVarInt(g_hEnableCount))
 			{
-				if(GetConVarInt(g_hRespawnCount) != g_iRespawnCount[client][cPlayer_Round] && 
-				   GetConVarInt(g_hMaxRespawnCount) != g_iRespawnCount[client][cPlayer_Map])
+				if(GetConVarInt(g_hRespawnCount) <= g_iRespawnCount[client][cPlayer_Round] && 
+				   GetConVarInt(g_hMaxRespawnCount) <= g_iRespawnCount[client][cPlayer_Map])
 				{
 					g_iRespawnCount[client][cPlayer_Round]++;
 					g_iRespawnCount[client][cPlayer_Map]++;
