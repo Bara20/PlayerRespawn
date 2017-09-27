@@ -21,6 +21,7 @@ new Handle:g_hEnableCount = INVALID_HANDLE;
 new Handle:g_hRespawnCount = INVALID_HANDLE;
 new Handle:g_hMaxRespawnCount = INVALID_HANDLE;
 new Handle:g_hEnableMessage = INVALID_HANDLE;
+new Handle:g_hEnablePluginVipMode = INVALID_HANDLE;
 
 enum g_RespawnEnum {
 	cPlayer_Round = 0,
@@ -60,6 +61,7 @@ public OnPluginStart()
 	AutoExecConfig_SetCreateFile(true);
 
 	g_hEnablePlugin = AutoExecConfig_CreateConVar("respawn_enable", "1", "Enable / Disable this Player Respawn Plugin", _, true, 0.0, true, 1.0);
+	g_hEnablePluginVipMode = AutoExecConfig_CreateConVar("respawn_enable_vipmode", "0", "Enable / Disable Player Respawn for vip", _, true, 0.0, true, 1.0);
 	g_hEnableMessage = AutoExecConfig_CreateConVar("respawn_message", "1", "Enable / Disable Chat Message when Player use !respawn", _, true, 0.0, true, 1.0);
 	g_hEnableCount = AutoExecConfig_CreateConVar("respawn_enable_count", "1", "Enable / Disable certain number of Respawn per Round", _, true, 0.0, true, 1.0);
 	g_hRespawnCount = AutoExecConfig_CreateConVar("respawn_count", "2", "How many respawn Count per Round?");
@@ -68,7 +70,10 @@ public OnPluginStart()
 	AutoExecConfig_ExecuteFile();
 	AutoExecConfig_CleanFile();
 
-	RegConsoleCmd("sm_respawn", Command_Respawn);
+	if(GetConVarInt(g_hEnablePluginVipMode) == 0)
+		RegConsoleCmd("sm_respawn", Command_Respawn);
+	else
+		RegAdminCmd("sm_respawn", Command_Respawn, ADMFLAG_RESERVATION);
 
 	HookEvent("round_end", Event_RoundEnd);
 
