@@ -70,10 +70,10 @@ public OnPluginStart()
 	AutoExecConfig_ExecuteFile();
 	AutoExecConfig_CleanFile();
 
-	if(GetConVarInt(g_hEnablePluginVipMode) == 0)
-		RegConsoleCmd("sm_respawn", Command_Respawn);
-	else
+	if(GetConVarInt(g_hEnablePluginVipMode))
 		RegAdminCmd("sm_respawn", Command_Respawn, ADMFLAG_RESERVATION);
+	else
+		RegConsoleCmd("sm_respawn", Command_Respawn);
 
 	HookEvent("round_end", Event_RoundEnd);
 
@@ -119,8 +119,8 @@ public Action:Command_Respawn(client, args)
 		{
 			if(GetConVarInt(g_hEnableCount))
 			{
-				if(GetConVarInt(g_hRespawnCount) <= g_iRespawnCount[client][cPlayer_Round] && 
-				   GetConVarInt(g_hMaxRespawnCount) <= g_iRespawnCount[client][cPlayer_Map])
+				if(g_iRespawnCount[client][cPlayer_Round] <= GetConVarInt(g_hRespawnCount) && 
+				   g_iRespawnCount[client][cPlayer_Map] <= GetConVarInt(g_hMaxRespawnCount))
 				{
 					g_iRespawnCount[client][cPlayer_Round]++;
 					g_iRespawnCount[client][cPlayer_Map]++;
