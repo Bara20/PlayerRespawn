@@ -12,16 +12,22 @@
 #include <dodhooks>
 #define REQUIRE_EXTENSIONS
 
-#define RESPAWN_VERSION "1.1.3"
+#define RESPAWN_VERSION "1.1.4"
 
 #define UPDATE_URL    "https://bara.in/update/playerrespawn.txt"
 
 new Handle:g_hEnablePlugin = INVALID_HANDLE;
 new Handle:g_hEnableCount = INVALID_HANDLE;
 new Handle:g_hRespawnCount = INVALID_HANDLE;
+new Handle:g_hMaxRespawnCount = INVALID_HANDLE;
 new Handle:g_hEnableMessage = INVALID_HANDLE;
 
-new g_iRespawnCount[MAXPLAYERS+1] = 0;
+enum g_RespawnEnum {
+	cPlayer_Round = 0,
+	cPlayer_Map
+};
+
+new g_iRespawnCount[MAXPLAYERS+1][2];
 
 public Plugin:myinfo = 
 {
@@ -57,6 +63,7 @@ public OnPluginStart()
 	g_hEnableMessage = AutoExecConfig_CreateConVar("respawn_message", "1", "Enable / Disable Chat Message when Player use !respawn", _, true, 0.0, true, 1.0);
 	g_hEnableCount = AutoExecConfig_CreateConVar("respawn_enable_count", "1", "Enable / Disable certain number of Respawn per Round", _, true, 0.0, true, 1.0);
 	g_hRespawnCount = AutoExecConfig_CreateConVar("respawn_count", "2", "How many respawn Count per Round?");
+	g_hMaxRespawnCount = AutoExecConfig_CreateConVar("respawn_max_map", "5", "How many respawn Count per Game?");
 
 	AutoExecConfig_ExecuteFile();
 	AutoExecConfig_CleanFile();
@@ -69,6 +76,12 @@ public OnPluginStart()
 	{
 		Updater_AddPlugin(UPDATE_URL);
 	}	
+}
+
+public OnClientPutInServer(int client)
+{
+	g_iRespawnCount[client][cPlayer_Round] = 0;
+	g_iRespawnCount[client][cPlayer_Map] = 0;
 }
 
 public OnLibraryAdded(const String:name[])
@@ -87,7 +100,7 @@ public Event_RoundEnd(Handle:event,const String:name[],bool:dontBroadcast)
 		{
 			if(IsClientValid(i))
 			{
-				g_iRespawnCount[i] = 0;
+				g_iRespawnCount[i][cPlayer_Round] = 0;
 			}
 		}
 	}
@@ -101,9 +114,11 @@ public Action:Command_Respawn(client, args)
 		{
 			if(GetConVarInt(g_hEnableCount))
 			{
-				if(GetConVarInt(g_hRespawnCount) != g_iRespawnCount[client])
+				if(GetConVarInt(g_hRespawnCount) != g_iRespawnCount[client][cPlayer_Round] && 
+				   GetConVarInt(g_hMaxRespawnCount) != g_iRespawnCount[client][cPlayer_Map])
 				{
-					g_iRespawnCount[client]++;
+					g_iRespawnCount[client][cPlayer_Round]++;
+					g_iRespawnCount[client][cPlayer_Map]++;
 					Respawn_Player(client);
 				}
 				else
